@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import InvariantError from '../../../Commons/exceptions/InvariantError.js';
 import JwtTokenManager from '../JwtTokenManager.js';
 import config from '../../../Commons/config.js';
+import AuthenticationError from '../../../Commons/exceptions/AuthenticationError.js';
 
 describe('JwtTokenManager', () => {
   describe('createAccessToken function', () => {
@@ -68,6 +69,30 @@ describe('JwtTokenManager', () => {
         .not.toThrow(InvariantError);
     });
   });
+
+  describe('verifyAccessToken function', () => {
+      it('should throw AuthorizationError when verification failed', async () => {
+        // Arrange
+        const jwtTokenManager = new JwtTokenManager(jwt);
+        const refreshToken = await jwtTokenManager.createRefreshToken({ username: 'mighdad' });
+
+        // Action & Assert
+        await expect(jwtTokenManager.verifyAccessToken(refreshToken))
+          .rejects
+          .toThrow(AuthenticationError);
+      });
+
+      it('should not throw Authorization when acess token verified', async () => {
+        // Arrange
+        const jwtTokenManager = new JwtTokenManager(jwt);
+        const accessToken = await jwtTokenManager.createAccessToken({ username: 'mighdad' });
+
+        // Action & Assert
+        await expect(jwtTokenManager.verifyAccessToken(accessToken))
+          .resolves
+          .not.toThrow(AuthenticationError);
+      });
+    });
 
   describe('decodePayload function', () => {
     it('should decode payload correctly', async () => {

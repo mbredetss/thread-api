@@ -1,5 +1,6 @@
 import AuthenticationTokenManager from '../../Applications/security/AuthenticationTokenManager.js';
 import config from '../../Commons/config.js';
+import AuthenticationError from '../../Commons/exceptions/AuthenticationError.js';
 import InvariantError from '../../Commons/exceptions/InvariantError.js';
 
 class JwtTokenManager extends AuthenticationTokenManager {
@@ -14,6 +15,14 @@ class JwtTokenManager extends AuthenticationTokenManager {
 
   async createRefreshToken(payload) {
     return this._jwt.sign(payload, config.auth.refreshTokenKey);
+  }
+
+  async verifyAccessToken(token) {
+    try {
+      this._jwt.verify(token, config.auth.accessTokenKey);
+    } catch {
+      throw new AuthenticationError('access token tidak valid!');
+    }
   }
 
   async verifyRefreshToken(token) {

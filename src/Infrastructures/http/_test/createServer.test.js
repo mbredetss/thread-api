@@ -5,6 +5,10 @@ import AuthenticationsTableTestHelper from '../../../../tests/AuthenticationsTab
 import container from '../../container.js';
 import createServer from '../createServer.js';
 import AuthenticationTokenManager from '../../../Applications/security/AuthenticationTokenManager.js';
+import { it } from 'vitest';
+import ThreadTableTestHelper from '../../../../tests/ThreadTableTestHelper.js';
+import JwtTokenManager from '../../security/JwtTokenManager.js';
+import jwt from 'jsonwebtoken';
 
 describe('HTTP server', () => {
   afterAll(async () => {
@@ -14,6 +18,7 @@ describe('HTTP server', () => {
   afterEach(async () => {
     await UsersTableTestHelper.cleanTable();
     await AuthenticationsTableTestHelper.cleanTable();
+    await ThreadTableTestHelper.cleanTable();
   });
 
   it('should response 404 when request unregistered route', async () => {
@@ -317,6 +322,46 @@ describe('HTTP server', () => {
       expect(response.status).toEqual(400);
       expect(response.body.status).toEqual('fail');
       expect(response.body.message).toEqual('harus mengirimkan token refresh');
+    });
+  });
+
+  describe('when POST /threads', () => {
+    it('should response 401 if users uploaded thread with invalid access token', async () => {
+      // Arrange
+      const requestPayload = {
+        title: 'thread title',
+        body: 'thread body',
+      };
+      const token = 'token-jwt';
+      const app = await createServer(container);
+
+      // Action
+      const response = await request(app).post('/threads').send(requestPayload)
+        .set('Authorization', `Bearer ${token}`);
+
+      // Assert
+      expect(response.status).toEqual(401);
+      expect(response.body.status).toEqual('fail');
+      expect(response.body.message).toEqual('access token tidak valid!');
+    });
+
+    it('should response 201 and store threads correctly if users uploaded thread with valid access token', async () => {
+      // Arrange
+      const requestPayload = {
+        title: 'thread title',
+        body: 'thread body',
+      };
+      const jwtTokenManager = new JwtTokenManager(jwt);
+      const accessToken = await jwtTokenManager.createAccessToken({ id: 'user-123' });
+      const app = await createServer(container);
+
+      UsersTableTestHelper.addUser({});
+      // Action
+      const response = await request(app).post('/threads').send(requestPayload)
+        .set('Authorization', `Bearer ${accessToken}`);
+
+      // Assert
+      expect(response.status).toEqual(201);
     });
   });
 
