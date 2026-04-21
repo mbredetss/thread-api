@@ -362,6 +362,8 @@ describe('HTTP server', () => {
 
       // Assert
       expect(response.status).toEqual(201);
+      expect(response.body.status).toEqual('success');
+      expect(response.body.data.addedThread).toBeDefined();
     });
   });
 

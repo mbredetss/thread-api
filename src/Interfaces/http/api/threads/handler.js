@@ -7,7 +7,7 @@ class ThreadsHandler {
         this.postThreadHandler = this.postThreadHandler.bind(this);
     }
 
-    async postThreadHandler(req, res, next) {
+    async postThreadHandler(req, res) {
         const accessToken = this._acessToken(req).split('Bearer ')[1];
         const addThreadUseCase = this._container.getInstance(AddThreadUseCase.name);
         const addedThread = await addThreadUseCase.execute({ ...req.body, accessToken });
