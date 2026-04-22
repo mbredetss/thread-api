@@ -28,10 +28,6 @@ class AddThreadUseCase {
         if (!accessToken) {
             throw new Error('ADD_THREAD_USE_CASE.NOT_CONTAIN_ACCESS_TOKEN');
         }
-
-        if (typeof accessToken !== 'string') {
-            throw new Error('REFRESH_AUTHENTICATION_USE_CASE.PAYLOAD_NOT_MEET_DATA_TYPE_SPECIFICATION');
-        }
     }
 }
 

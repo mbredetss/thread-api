@@ -16,19 +16,6 @@ describe('AddThreadUseCase', () => {
             .toThrowError('ADD_THREAD_USE_CASE.NOT_CONTAIN_ACCESS_TOKEN');;
     });
 
-    it('should throw error if use case payload not contain access token', async () => {
-        // Arrange
-        const useCasePayload = {
-            accessToken: 123,
-        };
-        const addThradAuthenticationUseCase = new AddThreadUseCase({});
-
-        // Action & Assert
-        await expect(addThradAuthenticationUseCase.execute(useCasePayload))
-            .rejects
-            .toThrowError('REFRESH_AUTHENTICATION_USE_CASE.PAYLOAD_NOT_MEET_DATA_TYPE_SPECIFICATION');;
-    });
-
     it('should orchestrating the new thread action correctly', async () => {
         // Arrange
         const useCasePayload = {

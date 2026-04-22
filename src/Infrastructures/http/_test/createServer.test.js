@@ -326,6 +326,65 @@ describe('HTTP server', () => {
   });
 
   describe('when POST /threads', () => {
+    it('should response 400 when request payload not contain needed property', async () => {
+      // Arrange
+      const requestPayload = {
+        title: 'thread title',
+      };
+      const app = await createServer(container);
+      const jwtTokenManager = new JwtTokenManager(jwt);
+      const accessToken = await jwtTokenManager.createAccessToken({ id: 'user-123' });
+
+      UsersTableTestHelper.addUser({});
+      // Action
+      const response = await request(app).post('/threads').send(requestPayload)
+        .set('Authorization', `Bearer ${accessToken}`);
+
+      // Assert
+      expect(response.status).toEqual(400);
+      expect(response.body.status).toEqual('fail');
+      expect(response.body.message).toEqual('tidak dapat membuat thread baru karena properti yang dibutuhkan tidak ada');
+    });
+
+    it('should response 400 when request payload not meet data type spesification', async () => {
+      // Arrange
+      const requestPayload = {
+        title: 123,
+        body: 'mbredets'
+      };
+      const app = await createServer(container);
+      const jwtTokenManager = new JwtTokenManager(jwt);
+      const accessToken = await jwtTokenManager.createAccessToken({ id: 'user-123' });
+
+      UsersTableTestHelper.addUser({});
+      // Action
+      const response = await request(app).post('/threads').send(requestPayload)
+        .set('Authorization', `Bearer ${accessToken}`);
+
+      // Assert
+      expect(response.status).toEqual(400);
+      expect(response.body.status).toEqual('fail');
+      expect(response.body.message).toEqual('tidak dapat membuat thread baru karena tipe data properti yang dibutuhkan tidak sesuai');
+    });
+
+    it('should response 400 when users sending empty access token', async () => {
+      // Arrange
+      const requestPayload = {
+        title: 'thread title',
+        body: 'thread body',
+      };
+      const app = await createServer(container);
+
+      // Action
+      const response = await request(app).post('/threads').send(requestPayload)
+        .set('Authorization', 'asda');
+
+      // Assert
+      expect(response.status).toEqual(400);
+      expect(response.body.status).toEqual('fail');
+      expect(response.body.message).toEqual('tidak bisa menambahkan thread karena akses token tidak ada')
+    })
+
     it('should response 401 if users uploaded thread with invalid access token', async () => {
       // Arrange
       const requestPayload = {
