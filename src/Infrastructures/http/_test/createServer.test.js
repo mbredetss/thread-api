@@ -9,6 +9,7 @@ import { it } from 'vitest';
 import ThreadTableTestHelper from '../../../../tests/ThreadTableTestHelper.js';
 import JwtTokenManager from '../../security/JwtTokenManager.js';
 import jwt from 'jsonwebtoken';
+import CommentsTableTestHelper from '../../../../tests/CommentsTableTestHelper.js';
 
 describe('HTTP server', () => {
   afterAll(async () => {
@@ -19,6 +20,7 @@ describe('HTTP server', () => {
     await UsersTableTestHelper.cleanTable();
     await AuthenticationsTableTestHelper.cleanTable();
     await ThreadTableTestHelper.cleanTable();
+    await CommentsTableTestHelper.cleanTable();
   });
 
   it('should response 404 when request unregistered route', async () => {
@@ -367,24 +369,6 @@ describe('HTTP server', () => {
       expect(response.body.message).toEqual('tidak dapat membuat thread baru karena tipe data properti yang dibutuhkan tidak sesuai');
     });
 
-    it('should response 400 when users sending empty access token', async () => {
-      // Arrange
-      const requestPayload = {
-        title: 'thread title',
-        body: 'thread body',
-      };
-      const app = await createServer(container);
-
-      // Action
-      const response = await request(app).post('/threads').send(requestPayload)
-        .set('Authorization', 'asda');
-
-      // Assert
-      expect(response.status).toEqual(400);
-      expect(response.body.status).toEqual('fail');
-      expect(response.body.message).toEqual('tidak bisa menambahkan thread karena akses token tidak ada')
-    })
-
     it('should response 401 if users uploaded thread with invalid access token', async () => {
       // Arrange
       const requestPayload = {
@@ -404,7 +388,25 @@ describe('HTTP server', () => {
       expect(response.body.message).toEqual('access token tidak valid!');
     });
 
-    it('should response 201 and store threads correctly if users uploaded thread with valid access token', async () => {
+    it('should response 401 when users sending wrong format authorization header', async () => {
+      // Arrange
+      const requestPayload = {
+        title: 'thread title',
+        body: 'thread body',
+      };
+      const app = await createServer(container);
+
+      // Action
+      const response = await request(app).post('/threads').send(requestPayload)
+        .set('Authorization', `token`);
+
+      // Assert
+      expect(response.status).toEqual(401);
+      expect(response.body.status).toEqual('fail');
+      expect(response.body.message).toEqual('access token tidak valid!');
+    })
+
+    it('should response 201 and store threads correctly', async () => {
       // Arrange
       const requestPayload = {
         title: 'thread title',
@@ -423,6 +425,141 @@ describe('HTTP server', () => {
       expect(response.status).toEqual(201);
       expect(response.body.status).toEqual('success');
       expect(response.body.data.addedThread).toBeDefined();
+    });
+  });
+
+  describe('when POST /threads/{threadId}/comments', () => {
+    it('should response 400 when payload did not contain needed property', async () => {
+      // Arrange
+      const requestPayload = {};
+
+      await UsersTableTestHelper.addUser({});
+      await ThreadTableTestHelper.addThread({ owner: 'user-123' });
+
+      const jwtTokenManager = new JwtTokenManager(jwt);
+      const accessToken = await jwtTokenManager.createAccessToken({ id: 'user-123' });
+      const app = await createServer(container);
+
+      // Action
+      const response = await request(app).post('/threads/thread-123/comments').send(requestPayload)
+        .set('Authorization', `Bearer ${accessToken}`);
+
+      // Asserrt
+      expect(response.status).toEqual(400);
+      expect(response.body.status).toEqual('fail');
+      expect(response.body.message).toEqual('tidak dapat membuat komentar baru karena properti yang dibutuhkan tidak ada');
+    });
+
+    it('should response 400 when payload did not meet data spesification', async () => {
+      // Arrange
+      const requestPayload = {
+        content: 123,
+      };
+
+      await UsersTableTestHelper.addUser({});
+      await ThreadTableTestHelper.addThread({ owner: 'user-123' });
+
+      const jwtTokenManager = new JwtTokenManager(jwt);
+      const accessToken = await jwtTokenManager.createAccessToken({ id: 'user-123' });
+      const app = await createServer(container);
+
+      // Action
+      const response = await request(app).post('/threads/thread-123/comments').send(requestPayload)
+        .set('Authorization', `Bearer ${accessToken}`);
+
+      // Asserrt
+      expect(response.status).toEqual(400);
+      expect(response.body.status).toEqual('fail');
+      expect(response.body.message).toEqual('tidak dapat membuat komentar baru karena tipe data properti yang dibutuhkan tidak sesuai');
+    });
+
+    it('should response 401 when users sending wrong format authorization header', async () => {
+      // Arrange
+      const requestPayload = {
+        content: 'waw',
+      };
+
+      await UsersTableTestHelper.addUser({});
+      await ThreadTableTestHelper.addThread({ owner: 'user-123' });
+
+      const app = await createServer(container);
+
+      // Action
+      const response = await request(app).post('/threads/thread-123/comments').send(requestPayload)
+        .set('Authorization', 'token');
+
+      // Asserrt
+      expect(response.status).toEqual(401);
+      expect(response.body.status).toEqual('fail');
+      expect(response.body.message).toEqual('access token tidak valid!');
+    });
+
+    it('should response 401 when users adding comment with invalid access token', async () => {
+      // Arrange
+      const requestPayload = {
+        content: 'asd'
+      };
+
+      await UsersTableTestHelper.addUser({});
+      await ThreadTableTestHelper.addThread({ owner: 'user-123' });
+
+      const accessToken = 'invalid token'
+      const app = await createServer(container);
+
+      // Action
+      const response = await request(app).post('/threads/thread-123/comments').send(requestPayload)
+        .set('Authorization', `Bearer ${accessToken}`);
+
+      // Assert
+      expect(response.status).toEqual(401);
+      expect(response.body.status).toEqual('fail');
+      expect(response.body.message).toEqual('access token tidak valid!');
+    });
+
+    it('should response 404 when users adding comment in not found thread', async () => {
+      // Arrange
+      const requestPayload = {
+        content: 'asd'
+      };
+
+      await UsersTableTestHelper.addUser({});
+      await ThreadTableTestHelper.addThread({ owner: 'user-123' });
+
+      const jwtTokenManager = new JwtTokenManager(jwt);
+      const accessToken = await jwtTokenManager.createAccessToken({ id: 'user-123' });
+      const app = await createServer(container);
+
+      // Action
+      const response = await request(app).post('/threads/unknown-thread/comments').send(requestPayload)
+        .set('Authorization', `Bearer ${accessToken}`);
+
+      // Assert
+      expect(response.status).toEqual(404);
+      expect(response.body.status).toEqual('fail');
+      expect(response.body.message).toEqual('thread id tidak ditemukan!');
+    });
+
+    it('should response 201 and store comments correctly', async () => {
+      // Arrange
+      const requestPayload = {
+        content: 'yoo whatt up buddy!'
+      };
+
+      await UsersTableTestHelper.addUser({});
+      await ThreadTableTestHelper.addThread({ owner: 'user-123' });
+
+      const jwtTokenManager = new JwtTokenManager(jwt);
+      const accessToken = await jwtTokenManager.createAccessToken({ id: 'user-123' });
+      const app = await createServer(container);
+
+      // Action
+      const response = await request(app).post('/threads/thread-123/comments').send(requestPayload)
+        .set('Authorization', `Bearer ${accessToken}`);
+
+      // Assert
+      expect(response.status).toEqual(201);
+      expect(response.body.status).toEqual('success');
+      expect(response.body.data.addedComment).toBeDefined();
     });
   });
 

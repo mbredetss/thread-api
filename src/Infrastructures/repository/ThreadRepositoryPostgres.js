@@ -1,3 +1,4 @@
+import NotFoundError from "../../Commons/exceptions/NotFoundError";
 import AddedThread from "../../Domains/threads/entities/AddedThread";
 import ThreadRepository from "../../Domains/threads/ThreadRepository";
 
@@ -20,6 +21,19 @@ class ThreadRepositoryPostgres extends ThreadRepository {
         const result = await this._pool.query(query);
 
         return new AddedThread({ ...result.rows[0] });
+    }
+
+    async findThreadById(id) {
+        const query = {
+            text: 'SELECT id FROM threads WHERE id = $1', 
+            values: [id],
+        };
+
+        const result = await this._pool.query(query);
+        
+        if (result.rowCount > 0) return result.rows;
+
+        throw new NotFoundError('thread id tidak ditemukan!');
     }
 }
 

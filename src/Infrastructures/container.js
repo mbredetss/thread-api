@@ -26,6 +26,9 @@ import RefreshAuthenticationUseCase from '../Applications/use_case/RefreshAuthen
 import AddThreadUseCase from '../Applications/use_case/AddThreadUseCase.js';
 import ThreadRepository from '../Domains/threads/ThreadRepository.js';
 import ThreadRepositoryPostgres from './repository/ThreadRepositoryPostgres.js';
+import AddCommentUseCase from '../Applications/use_case/AddCommentUseCase.js';
+import CommentRepository from '../Domains/comments/CommentRepository.js';
+import CommentRepositoryPostgres from './repository/CommentRepositoryPostgres.js';
 
 // creating container
 const container = createContainer();
@@ -59,6 +62,20 @@ container.register([
         }
       ]
     }
+  }, 
+  {
+    key: CommentRepository.name, 
+    Class: CommentRepositoryPostgres, 
+    parameter: {
+      dependencies: [
+        {
+          concrete: pool, 
+        }, 
+        {
+          concrete: nanoid, 
+        }, 
+      ], 
+    }, 
   }, 
   {
     key: AuthenticationRepository.name,
@@ -184,7 +201,28 @@ container.register([
           internal: AuthenticationTokenManager.name,
         },
       ], 
-    }
+    }, 
+  }, 
+  {
+    key: AddCommentUseCase.name, 
+    Class: AddCommentUseCase, 
+    parameter: {
+      injectType: 'destructuring', 
+      dependencies: [
+        {
+          name: 'commentRepository', 
+          internal: CommentRepository.name, 
+        }, 
+        {
+          name: 'threadRepository', 
+          internal: ThreadRepository.name, 
+        }, 
+        {
+          name: 'authenticationTokenManager', 
+          internal: AuthenticationTokenManager.name, 
+        }
+      ], 
+    }, 
   }
 ]);
 

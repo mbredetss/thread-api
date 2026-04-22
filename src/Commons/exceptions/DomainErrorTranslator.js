@@ -20,6 +20,8 @@ DomainErrorTranslator._directories = {
   'NEW_THREAD.NOT_CONTAIN_NEEDED_PROPERTY': new InvariantError('tidak dapat membuat thread baru karena properti yang dibutuhkan tidak ada'), 
   'NEW_THREAD.NOT_MEET_DATA_TYPE_SPECIFICATION': new InvariantError('tidak dapat membuat thread baru karena tipe data properti yang dibutuhkan tidak sesuai'),
   'ADD_THREAD_USE_CASE.NOT_CONTAIN_ACCESS_TOKEN': new InvariantError('tidak bisa menambahkan thread karena akses token tidak ada'), 
+  'NEW_COMMENT.NOT_CONTAIN_NEEDED_PROPERTY': new InvariantError('tidak dapat membuat komentar baru karena properti yang dibutuhkan tidak ada'), 
+  'NEW_COMMENT.NOT_MEET_DATA_TYPE_SPESIFICATION': new InvariantError('tidak dapat membuat komentar baru karena tipe data properti yang dibutuhkan tidak sesuai'), 
 };
 
 export default DomainErrorTranslator;
