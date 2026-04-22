@@ -25,7 +25,8 @@ export const up = (pgm) => {
         owner: {
             type: 'VARCHAR(50)', 
             references: 'users', 
-            onDelete: 'CASCADE',
+            onDelete: 'CASCADE', 
+            notNull: true, 
         }
     });
 };

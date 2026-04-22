@@ -1,4 +1,5 @@
 import AddThreadUseCase from "../../../../Applications/use_case/AddThreadUseCase.js";
+import AuthenticationError from "../../../../Commons/exceptions/AuthenticationError.js";
 
 class ThreadsHandler {
     constructor(container) {
@@ -8,7 +9,7 @@ class ThreadsHandler {
     }
 
     async postThreadHandler(req, res) {
-        const accessToken = this._acessToken(req).split('Bearer ')[1];
+        const accessToken = this._accessToken(req);
         const addThreadUseCase = this._container.getInstance(AddThreadUseCase.name);
         const addedThread = await addThreadUseCase.execute({ ...req.body, accessToken });
         
@@ -20,8 +21,13 @@ class ThreadsHandler {
         });
     }
 
-    _acessToken(req) {
-        return req.headers.authorization;
+    _accessToken(req) {
+        const token = req.headers.authorization;
+        if (token && token.indexOf('Bearer ') !== -1) {
+            return token.split('Bearer ')[1];
+        }
+        console.log('error')
+        throw new AuthenticationError('access token tidak valid!');
     }
 }
 
