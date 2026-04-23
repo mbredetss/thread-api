@@ -17,6 +17,7 @@ const createServer = async (container) => {
   app.use('/authentications', authentications(container));
   app.use('/threads', threads(container));
   app.use('/threads/:threadId/comments', comments(container));
+  app.use('/threads/:threadId/comments/:commentId', comments(container));
 
   // Global error handler
   app.use((error, req, res, next) => {

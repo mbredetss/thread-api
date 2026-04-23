@@ -29,6 +29,10 @@ export const up = (pgm) => {
             references: 'threads', 
             onDelete: 'CASCADE', 
             notNull: true, 
+        }, 
+        isDelete: {
+            type: 'BOOLEAN', 
+            default: false, 
         }
     });
 };

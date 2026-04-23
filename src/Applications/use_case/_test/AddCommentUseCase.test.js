@@ -48,17 +48,17 @@ describe('AddCommentUseCase', () => {
         const mockThreadRepository = new ThreadRepository();
         const mockAuthenticationTokenManager = new AuthenticationTokenManager();
 
-        // Mocking
+        /** Mocking */
         mockAuthenticationTokenManager.verifyAccessToken = vi.fn()
             .mockImplementation(() => Promise.resolve());
         mockThreadRepository.findThreadById = vi.fn()
-            .mockImplementation(() => Promise.resolve([{ id: 'thread-123' }]));
+            .mockImplementation(() => Promise.resolve());
         mockAuthenticationTokenManager.decodePayload = vi.fn()
             .mockImplementation(() => Promise.resolve({ id: 'user-123' }));
         mockCommentRepository.addComment = vi.fn()
             .mockImplementation(() => Promise.resolve(mockAddedComment));
 
-        // Create the use case instace
+        /** Create the use case instace */
         const addCommentUseCase = new AddCommentUseCase({
             commentRepository: mockCommentRepository,
             threadRepository: mockThreadRepository,

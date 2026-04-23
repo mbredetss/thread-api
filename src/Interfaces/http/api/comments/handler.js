@@ -1,4 +1,5 @@
 import AddCommentUseCase from "../../../../Applications/use_case/AddCommentUseCase";
+import DeleteCommentUseCase from "../../../../Applications/use_case/DeleteCommentUseCase";
 import AuthenticationError from "../../../../Commons/exceptions/AuthenticationError";
 
 class CommentsHandler {
@@ -6,6 +7,7 @@ class CommentsHandler {
         this._container = container;
 
         this.postCommentHandler = this.postCommentHandler.bind(this);
+        this.deleteCommentHandler = this.deleteCommentHandler.bind(this);
     }
 
     async postCommentHandler(req, res) {
@@ -13,7 +15,6 @@ class CommentsHandler {
         const content = req.body.content;
         const threadId = req.params.threadId;
         const addCommentUseCase = this._container.getInstance(AddCommentUseCase.name);
-        
         const addedComment = await addCommentUseCase.execute({
             accessToken, 
             content, 
@@ -25,6 +26,23 @@ class CommentsHandler {
             data: {
                 addedComment, 
             }
+        });
+    }
+
+    async deleteCommentHandler(req, res) {
+        const accessToken = this._accessToken(req);
+        const threadId = req.params.threadId;
+        const commentId = req.params.commentId;
+        const deleteCommentUseCase = this._container.getInstance(DeleteCommentUseCase.name);
+
+        await deleteCommentUseCase.execute({
+            accessToken, 
+            threadId, 
+            commentId, 
+        });
+
+        res.status(201).json({
+            status: 'success', 
         });
     }
 

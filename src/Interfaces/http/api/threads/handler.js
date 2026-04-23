@@ -26,7 +26,6 @@ class ThreadsHandler {
         if (token && token.indexOf('Bearer ') !== -1) {
             return token.split('Bearer ')[1];
         }
-        console.log('error')
         throw new AuthenticationError('access token tidak valid!');
     }
 }

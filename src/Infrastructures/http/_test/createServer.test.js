@@ -536,7 +536,7 @@ describe('HTTP server', () => {
       // Assert
       expect(response.status).toEqual(404);
       expect(response.body.status).toEqual('fail');
-      expect(response.body.message).toEqual('thread id tidak ditemukan!');
+      expect(response.body.message).toEqual('thread tidak ditemukan!');
     });
 
     it('should response 201 and store comments correctly', async () => {
@@ -562,6 +562,105 @@ describe('HTTP server', () => {
       expect(response.body.data.addedComment).toBeDefined();
     });
   });
+
+  describe('when DELETE /threads/{threadId}/comments/{commentId}', () => {
+    it('should response 401 when users sending wrong format authorization header', async () => {
+      // Assert
+      await UsersTableTestHelper.addUser({});
+      await ThreadTableTestHelper.addThread({ owner: 'user-123' });
+      await CommentsTableTestHelper.addComment({});
+
+      const app = await createServer(container);
+
+      // Action
+      const response = await request(app).delete('/threads/thread-123/comments/comment-123')
+        .set('Authorization', 'wrong-format-token');
+
+      // Assert
+      expect(response.status).toEqual(401);
+      expect(response.body.status).toEqual('fail');
+      expect(response.body.message).toEqual('access token tidak valid!');
+    });
+
+    it('should response 403 when users trying to delete comments that dont belong to him', async () => {
+      // Assert
+      await UsersTableTestHelper.addUser({});
+      await ThreadTableTestHelper.addThread({ owner: 'user-123' });
+      await CommentsTableTestHelper.addComment({});
+
+      const authenticationTokenManager = new JwtTokenManager(jwt);
+      const accessToken = await authenticationTokenManager.createAccessToken({ id: 'user-234' });
+      const app = await createServer(container);
+
+      // Action
+      const response = await request(app).delete('/threads/thread-123/comments/comment-123')
+        .set('Authorization', `Bearer ${accessToken}`);
+
+      // Assert
+      expect(response.status).toEqual(403);
+      expect(response.body.status).toEqual('fail');
+      expect(response.body.message).toEqual('Anda tidak memiliki akses ke resource ini');
+    });
+
+    it('should response 404 when users trying to delete comments with not found thread', async () => {
+      // Assert
+      await UsersTableTestHelper.addUser({});
+      await ThreadTableTestHelper.addThread({ owner: 'user-123' });
+      await CommentsTableTestHelper.addComment({});
+
+      const authenticationTokenManager = new JwtTokenManager(jwt);
+      const accessToken = await authenticationTokenManager.createAccessToken({ id: 'user-234' });
+      const app = await createServer(container);
+
+      // Action
+      const response = await request(app).delete('/threads/not-found-thread/comments/comment-123')
+        .set('Authorization', `Bearer ${accessToken}`);
+
+      // Assert
+      expect(response.status).toEqual(404);
+      expect(response.body.status).toEqual('fail');
+      expect(response.body.message).toEqual('thread tidak ditemukan!');
+    });
+
+    it('should response 404 when users trying to delete comments with not found comments', async () => {
+      // Assert
+      await UsersTableTestHelper.addUser({});
+      await ThreadTableTestHelper.addThread({ owner: 'user-123' });
+      await CommentsTableTestHelper.addComment({});
+
+      const authenticationTokenManager = new JwtTokenManager(jwt);
+      const accessToken = await authenticationTokenManager.createAccessToken({ id: 'user-234' });
+      const app = await createServer(container);
+
+      // Action
+      const response = await request(app).delete('/threads/thread-123/comments/not-found-comments')
+        .set('Authorization', `Bearer ${accessToken}`);
+
+      // Assert
+      expect(response.status).toEqual(404);
+      expect(response.body.status).toEqual('fail');
+      expect(response.body.message).toEqual('komentar tidak di temukan!');
+    });
+
+    it('should response 201 and delete comments correctly', async () => {
+      // Assert
+      await UsersTableTestHelper.addUser({});
+      await ThreadTableTestHelper.addThread({ owner: 'user-123' });
+      await CommentsTableTestHelper.addComment({});
+
+      const authenticationTokenManager = new JwtTokenManager(jwt);
+      const accessToken = await authenticationTokenManager.createAccessToken({ id: 'user-123' });
+      const app = await createServer(container);
+
+      // Action
+      const response = await request(app).delete('/threads/thread-123/comments/comment-123')
+        .set('Authorization', `Bearer ${accessToken}`);
+      
+      // Assert
+      expect(response.status).toEqual(201);
+      expect(response.body.status).toEqual('success');
+    });
+  })
 
   it('should handle server error correctly', async () => {
     // Arrange
