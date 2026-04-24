@@ -18,6 +18,7 @@ const createServer = async (container) => {
   app.use('/threads', threads(container));
   app.use('/threads/:threadId/comments', comments(container));
   app.use('/threads/:threadId/comments/:commentId', comments(container));
+  app.use('/threads/:threadId', threads(container));
 
   // Global error handler
   app.use((error, req, res, next) => {
@@ -31,14 +32,13 @@ const createServer = async (container) => {
         message: translatedError.message,
       });
     }
-    
+
     // penanganan server error sesuai kebutuhan
     return res.status(500).json({
       status: 'error',
       message: 'terjadi kegagalan pada server kami',
     });
   });
-
   // 404 handler
   app.use((req, res) => {
     res.status(404).json({

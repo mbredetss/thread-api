@@ -2,8 +2,9 @@ import AuthorizationError from "../../Commons/exceptions/AuthorizationError";
 import NotFoundError from "../../Commons/exceptions/NotFoundError";
 import CommentRepository from "../../Domains/comments/CommentRepository";
 import AddedComment from "../../Domains/comments/entities/AddedComment";
+import DetailedComment from "../../Domains/comments/entities/DetailedComment";
 
-class CommentRepositoryPostgres extends CommentRepository{
+class CommentRepositoryPostgres extends CommentRepository {
     constructor(pool, idGenerator) {
         super();
         this._pool = pool;
@@ -15,8 +16,8 @@ class CommentRepositoryPostgres extends CommentRepository{
         const id = `comment-${this._idGenerator()}`;
 
         const query = {
-            text: 'INSERT INTO comments VALUES($1, $2, $3, $4) returning id, content, owner', 
-            values: [id, content, owner, threadId], 
+            text: 'INSERT INTO comments VALUES($1, $2, $3, $4) returning id, content, owner',
+            values: [id, content, owner, threadId],
         };
 
         const result = await this._pool.query(query);
@@ -27,8 +28,8 @@ class CommentRepositoryPostgres extends CommentRepository{
 
     async findCommentById(id) {
         const query = {
-            text: 'SELECT id FROM comments WHERE id = $1', 
-            values: [id], 
+            text: 'SELECT id FROM comments WHERE id = $1',
+            values: [id],
         };
 
         const result = await this._pool.query(query);
@@ -41,8 +42,8 @@ class CommentRepositoryPostgres extends CommentRepository{
     async checkCommentOwner(commentData) {
         const { userId, commentId } = commentData;
         const query = {
-            text: 'SELECT id FROM comments WHERE owner = $1 AND id = $2', 
-            values: [userId, commentId], 
+            text: 'SELECT id FROM comments WHERE owner = $1 AND id = $2',
+            values: [userId, commentId],
         };
 
         const result = await this._pool.query(query);
@@ -54,11 +55,32 @@ class CommentRepositoryPostgres extends CommentRepository{
 
     async deleteComment(id) {
         const query = {
-            text: 'UPDATE comments SET "isDelete" = true WHERE id = $1', 
-            values: [id], 
+            text: 'UPDATE comments SET "isDelete" = true WHERE id = $1',
+            values: [id],
         };
 
         await this._pool.query(query);
+    }
+
+    async getCommentFromThread(threadId) {
+        const query = {
+            text: `SELECT c.id, username, "createdAt" as date, content, "isDelete"
+                    FROM comments AS c JOIN USERS as u
+                    ON c.owner = u.id
+                    WHERE "threadId" = $1
+                    ORDER BY date ASC`,
+            values: [threadId],
+        };
+
+        const result = await this._pool.query(query);
+
+        const comments = result.rows.map((comment) => new DetailedComment({
+            id: comment.id,
+            username: comment.username,
+            date: comment.date.toISOString(),
+            content: comment.isDelete ? '**komentar telah dihapus**' : comment.content
+        }));
+        return comments;
     }
 }
 

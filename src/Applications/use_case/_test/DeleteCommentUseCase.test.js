@@ -45,7 +45,7 @@ describe('DeleteCommentUseCase', () => {
 
         /** Mocking */
         mockThreadRepository.findThreadById = vi.fn()
-            .mockImplementation(() => Promise.resolve);
+            .mockImplementation(() => Promise.resolve());
         mockCommentRepository.findCommentById = vi.fn()
             .mockImplementation(() => Promise.resolve());
         mockAuthenticationTokenManager.verifyAccessToken = vi.fn()

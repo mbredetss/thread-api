@@ -8,11 +8,13 @@ import NewComment from '../../../Domains/comments/entities/NewComment';
 import pool from '../../database/postgres/pool.js';
 import CommentRepositoryPostgres from '../CommentRepositoryPostgres.js';
 import AuthorizationError from '../../../Commons/exceptions/AuthorizationError.js';
+import DetailedComment from '../../../Domains/comments/entities/DetailedComment.js';
 
 describe('CommentRepositoryPostgres', () => {
     afterEach(async () => {
-        await CommentsTableTestHelper.cleanTable();
+        await UsersTableTestHelper.cleanTable();
         await ThreadTableTestHelper.cleanTable();
+        await CommentsTableTestHelper.cleanTable();
     });
 
     afterAll(async () => {
@@ -39,6 +41,7 @@ describe('CommentRepositoryPostgres', () => {
             const comment = await CommentsTableTestHelper.findCommentById('comment-123');
             expect(comment).toHaveLength(1);
         });
+
         it('should return added comment correctly', async () => {
             // Assert
             await UsersTableTestHelper.addUser({});
@@ -68,14 +71,8 @@ describe('CommentRepositoryPostgres', () => {
             // Assert
             await UsersTableTestHelper.addUser({});
             await ThreadTableTestHelper.addThread({ owner: 'user-123' });
-            const newComment = new NewComment({
-                content: 'ini konten',
-                owner: 'user-123',
-                threadId: 'thread-123'
-            });
-            const fakeIdGenerator = () => '123';
-            const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, fakeIdGenerator);
-            await commentRepositoryPostgres.addComment(newComment);
+            await CommentsTableTestHelper.addComment({});
+            const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, () => { });
 
             // Action and Assert
             await expect(() => commentRepositoryPostgres.findCommentById('not-found-thread-id')).rejects.toThrowError(NotFoundError);
@@ -85,14 +82,8 @@ describe('CommentRepositoryPostgres', () => {
             // Assert
             await UsersTableTestHelper.addUser({});
             await ThreadTableTestHelper.addThread({ owner: 'user-123' });
-            const newComment = new NewComment({
-                content: 'ini konten',
-                owner: 'user-123',
-                threadId: 'thread-123'
-            });
-            const fakeIdGenerator = () => '123';
-            const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, fakeIdGenerator);
-            await commentRepositoryPostgres.addComment(newComment);
+            await CommentsTableTestHelper.addComment({});
+            const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, () => { });
 
             // Action and Assert
             await expect(commentRepositoryPostgres.findCommentById('comment-123'))
@@ -105,14 +96,8 @@ describe('CommentRepositoryPostgres', () => {
             // Assert
             await UsersTableTestHelper.addUser({});
             await ThreadTableTestHelper.addThread({ owner: 'user-123' });
-            const newComment = new NewComment({
-                content: 'ini konten',
-                owner: 'user-123',
-                threadId: 'thread-123'
-            });
-            const fakeIdGenerator = () => '123';
-            const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, fakeIdGenerator);
-            await commentRepositoryPostgres.addComment(newComment);
+            await CommentsTableTestHelper.addComment({});
+            const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, () => { });
 
             // Action and Assert
             await expect(commentRepositoryPostgres.checkCommentOwner({
@@ -125,14 +110,8 @@ describe('CommentRepositoryPostgres', () => {
             // Assert
             await UsersTableTestHelper.addUser({});
             await ThreadTableTestHelper.addThread({ owner: 'user-123' });
-            const newComment = new NewComment({
-                content: 'ini konten',
-                owner: 'user-123',
-                threadId: 'thread-123'
-            });
-            const fakeIdGenerator = () => '123';
-            const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, fakeIdGenerator);
-            await commentRepositoryPostgres.addComment(newComment);
+            await CommentsTableTestHelper.addComment({});
+            const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, () => { });
 
             // Action and Assert
             await expect(commentRepositoryPostgres.checkCommentOwner({
@@ -144,24 +123,51 @@ describe('CommentRepositoryPostgres', () => {
 
     describe('deleteComment function', () => {
         it('should delete comment correctly', async () => {
-            // Assert
+            // Arrange
             await UsersTableTestHelper.addUser({});
             await ThreadTableTestHelper.addThread({ owner: 'user-123' });
-            const newComment = new NewComment({
-                content: 'ini konten',
-                owner: 'user-123',
-                threadId: 'thread-123'
-            });
-            const fakeIdGenerator = () => '123';
-            const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, fakeIdGenerator);
-            await commentRepositoryPostgres.addComment(newComment);
+            await CommentsTableTestHelper.addComment({});
+            const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, () => { });
 
             // Action
             await commentRepositoryPostgres.deleteComment('comment-123');
-            const deletedComment =  await CommentsTableTestHelper.findCommentById('comment-123');
-            
+            const deletedComment = await CommentsTableTestHelper.findCommentById('comment-123');
+
             // Assert
             expect(deletedComment[0].isDelete).toEqual(true);
         });
-    })
+    });
+
+    describe('getCommentFromThread function', () => {
+        it('should return comment from thread correctly', async () => {
+            // Arrange
+            await UsersTableTestHelper.addUser({});
+            await ThreadTableTestHelper.addThread({ owner: 'user-123' });
+            await CommentsTableTestHelper.addComment({});
+            await CommentsTableTestHelper.addComment({ id: 'comment-234' });
+            await CommentsTableTestHelper.deleteComment('comment-234');
+
+            const commentRepository = new CommentRepositoryPostgres(pool, () => { });
+
+            // Action
+            const comments = await commentRepository.getCommentFromThread('thread-123');
+
+            // Assert
+            expect(comments).toHaveLength(2);
+            expect(comments).toStrictEqual([
+                new DetailedComment({
+                    id: 'comment-123', 
+                    username: 'dicoding', 
+                    date: comments[0].date, 
+                    content: 'ini konten', 
+                }), 
+                new DetailedComment({
+                    id: 'comment-234', 
+                    username: 'dicoding', 
+                    date: comments[1].date, 
+                    content: '**komentar telah dihapus**',
+                }), 
+            ]);
+        });
+    });
 });

@@ -5,7 +5,7 @@ import AuthenticationsTableTestHelper from '../../../../tests/AuthenticationsTab
 import container from '../../container.js';
 import createServer from '../createServer.js';
 import AuthenticationTokenManager from '../../../Applications/security/AuthenticationTokenManager.js';
-import { it } from 'vitest';
+import { expect, it } from 'vitest';
 import ThreadTableTestHelper from '../../../../tests/ThreadTableTestHelper.js';
 import JwtTokenManager from '../../security/JwtTokenManager.js';
 import jwt from 'jsonwebtoken';
@@ -337,7 +337,7 @@ describe('HTTP server', () => {
       const jwtTokenManager = new JwtTokenManager(jwt);
       const accessToken = await jwtTokenManager.createAccessToken({ id: 'user-123' });
 
-      UsersTableTestHelper.addUser({});
+      await UsersTableTestHelper.addUser({});
       // Action
       const response = await request(app).post('/threads').send(requestPayload)
         .set('Authorization', `Bearer ${accessToken}`);
@@ -358,7 +358,7 @@ describe('HTTP server', () => {
       const jwtTokenManager = new JwtTokenManager(jwt);
       const accessToken = await jwtTokenManager.createAccessToken({ id: 'user-123' });
 
-      UsersTableTestHelper.addUser({});
+      await UsersTableTestHelper.addUser({});
       // Action
       const response = await request(app).post('/threads').send(requestPayload)
         .set('Authorization', `Bearer ${accessToken}`);
@@ -416,7 +416,7 @@ describe('HTTP server', () => {
       const accessToken = await jwtTokenManager.createAccessToken({ id: 'user-123' });
       const app = await createServer(container);
 
-      UsersTableTestHelper.addUser({});
+      await UsersTableTestHelper.addUser({});
       // Action
       const response = await request(app).post('/threads').send(requestPayload)
         .set('Authorization', `Bearer ${accessToken}`);
@@ -655,12 +655,49 @@ describe('HTTP server', () => {
       // Action
       const response = await request(app).delete('/threads/thread-123/comments/comment-123')
         .set('Authorization', `Bearer ${accessToken}`);
-      
+
       // Assert
       expect(response.status).toEqual(201);
       expect(response.body.status).toEqual('success');
     });
-  })
+  });
+
+  describe('when GET /threads/{threadId}', () => {
+    it('should response 404 when users trying to access not found thread', async () => {
+      // Assert
+      await UsersTableTestHelper.addUser({});
+      await ThreadTableTestHelper.addThread({ owner: 'user-123' });
+
+      const app = await createServer(container);
+
+      // Action
+      const response = await request(app).get('/threads/not-found-thread');
+
+      // Assert
+      expect(response.status).toEqual(404);
+      expect(response.body.status).toEqual('fail');
+      expect(response.body.message).toEqual('thread tidak ditemukan!');
+    });
+
+    it('should response 201 and correct response body', async () => {
+      // Arrange
+      await UsersTableTestHelper.addUser({});
+      await ThreadTableTestHelper.addThread({ owner: 'user-123' });
+      await CommentsTableTestHelper.addComment({});
+      await CommentsTableTestHelper.addComment({ id: 'user-234' });
+
+      const app = await createServer(container);
+
+      // Action
+      const response = await request(app).get('/threads/thread-123');
+
+      // Assert
+      expect(response.status).toEqual(201);
+      expect(response.body.status).toEqual('success');
+      expect(response.body.data.thread).toBeDefined();
+      expect(response.body.data.thread.comments).toHaveLength(2);
+    });
+  });
 
   it('should handle server error correctly', async () => {
     // Arrange

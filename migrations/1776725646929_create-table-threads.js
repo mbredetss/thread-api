@@ -12,22 +12,27 @@ export const up = (pgm) => {
     pgm.createTable('threads', {
         id: {
             type: 'VARCHAR(50)',
-            primaryKey: true, 
-        }, 
+            primaryKey: true,
+        },
         title: {
-            type: 'VARCHAR(50)', 
+            type: 'VARCHAR(50)',
             notNull: true,
-        }, 
+        },
         body: {
-            type: 'TEXT', 
-            notNull: true, 
-        }, 
+            type: 'TEXT',
+            notNull: true,
+        },
         owner: {
-            type: 'VARCHAR(50)', 
-            references: 'users', 
-            onDelete: 'CASCADE', 
-            notNull: true, 
-        }
+            type: 'VARCHAR(50)',
+            references: 'users',
+            onDelete: 'CASCADE',
+            notNull: true,
+        },
+        createdAt: {
+            type: 'TIMESTAMPTZ',
+            notNull: true,
+            default: pgm.func('CURRENT_TIMESTAMP')
+        },
     });
 };
 

@@ -39,5 +39,5 @@ describe('a AddedThread entities', () => {
         expect(id).toEqual('thread-123');
         expect(title).toEqual('thread title');
         expect(owner).toEqual('mighdad');
-    })
+    });
 });

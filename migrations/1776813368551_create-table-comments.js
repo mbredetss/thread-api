@@ -22,18 +22,24 @@ export const up = (pgm) => {
             type: 'VARCHAR(50)',
             references: 'users',
             onDelete: 'CASCADE',
-            notNull: true, 
-        }, 
+            notNull: true,
+        },
         threadId: {
-            type: 'VARCHAR(50)', 
-            references: 'threads', 
-            onDelete: 'CASCADE', 
-            notNull: true, 
-        }, 
+            type: 'VARCHAR(50)',
+            references: 'threads',
+            onDelete: 'CASCADE',
+            notNull: true,
+        },
         isDelete: {
-            type: 'BOOLEAN', 
-            default: false, 
-        }
+            type: 'BOOLEAN',
+            notNull: true, 
+            default: false,
+        },
+        createdAt: {
+            type: 'TIMESTAMPTZ',
+            notNull: true,
+            default: pgm.func('CURRENT_TIMESTAMP')
+        },
     });
 };
 
