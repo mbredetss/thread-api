@@ -21,14 +21,14 @@ class JwtTokenManager extends AuthenticationTokenManager {
     try {
       this._jwt.verify(token, config.auth.accessTokenKey);
     } catch {
-      throw new AuthenticationError('access token tidak valid!');
+      throw new AuthenticationError('Missing authentication');
     }
   }
 
   async verifyRefreshToken(token) {
     try {
       this._jwt.verify(token, config.auth.refreshTokenKey);
-    } catch (error) {
+    } catch (_error) {
       throw new InvariantError('refresh token tidak valid');
     }
   }

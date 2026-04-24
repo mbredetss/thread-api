@@ -52,33 +52,33 @@ container.register([
     },
   },
   {
-    key: ThreadRepository.name, 
-    Class: ThreadRepositoryPostgres, 
+    key: ThreadRepository.name,
+    Class: ThreadRepositoryPostgres,
     parameter: {
       dependencies: [
         {
           concrete: pool,
-        }, 
+        },
         {
-          concrete: nanoid, 
+          concrete: nanoid,
         }
       ]
     }
-  }, 
+  },
   {
-    key: CommentRepository.name, 
-    Class: CommentRepositoryPostgres, 
+    key: CommentRepository.name,
+    Class: CommentRepositoryPostgres,
     parameter: {
       dependencies: [
         {
-          concrete: pool, 
-        }, 
+          concrete: pool,
+        },
         {
-          concrete: nanoid, 
-        }, 
-      ], 
-    }, 
-  }, 
+          concrete: nanoid,
+        },
+      ],
+    },
+  },
   {
     key: AuthenticationRepository.name,
     Class: AuthenticationRepositoryPostgres,
@@ -189,81 +189,81 @@ container.register([
     },
   },
   {
-    key: AddThreadUseCase.name, 
-    Class: AddThreadUseCase, 
+    key: AddThreadUseCase.name,
+    Class: AddThreadUseCase,
     parameter: {
-      injectType: 'destructuring', 
+      injectType: 'destructuring',
       dependencies: [
         {
-          name: 'threadRepository', 
+          name: 'threadRepository',
           internal: ThreadRepository.name,
-        }, 
+        },
         {
           name: 'authenticationTokenManager',
           internal: AuthenticationTokenManager.name,
         },
-      ], 
-    }, 
-  }, 
+      ],
+    },
+  },
   {
-    key: AddCommentUseCase.name, 
-    Class: AddCommentUseCase, 
+    key: AddCommentUseCase.name,
+    Class: AddCommentUseCase,
     parameter: {
-      injectType: 'destructuring', 
+      injectType: 'destructuring',
       dependencies: [
         {
-          name: 'commentRepository', 
-          internal: CommentRepository.name, 
-        }, 
+          name: 'commentRepository',
+          internal: CommentRepository.name,
+        },
         {
-          name: 'threadRepository', 
-          internal: ThreadRepository.name, 
-        }, 
+          name: 'threadRepository',
+          internal: ThreadRepository.name,
+        },
         {
-          name: 'authenticationTokenManager', 
-          internal: AuthenticationTokenManager.name, 
+          name: 'authenticationTokenManager',
+          internal: AuthenticationTokenManager.name,
         }
-      ], 
-    }, 
-  }, 
+      ],
+    },
+  },
   {
-    key: DeleteCommentUseCase.name, 
-    Class: DeleteCommentUseCase, 
+    key: DeleteCommentUseCase.name,
+    Class: DeleteCommentUseCase,
     parameter: {
-      injectType: 'destructuring', 
+      injectType: 'destructuring',
       dependencies: [
         {
-          name: 'threadRepository', 
-          internal: ThreadRepository.name, 
-        }, 
+          name: 'threadRepository',
+          internal: ThreadRepository.name,
+        },
         {
-          name: 'commentRepository', 
-          internal: CommentRepository.name, 
-        }, 
+          name: 'commentRepository',
+          internal: CommentRepository.name,
+        },
         {
-          name: 'authenticationTokenManager', 
-          internal: AuthenticationTokenManager.name, 
+          name: 'authenticationTokenManager',
+          internal: AuthenticationTokenManager.name,
         }
-      ], 
-    }, 
-  }, 
+      ],
+    },
+  },
   {
-    key: GetDetailThreadUseCase.name, 
-    Class: GetDetailThreadUseCase, 
+    key: GetDetailThreadUseCase.name,
+    Class: GetDetailThreadUseCase,
     parameter: {
-      injectType: 'destructuring', 
+      injectType: 'destructuring',
       dependencies: [
         {
-          name: 'threadRepository', 
-          internal: ThreadRepository.name, 
-        }, 
+          name: 'threadRepository',
+          internal: ThreadRepository.name,
+        },
         {
-          name: 'commentRepository', 
-          internal: CommentRepository.name, 
-        }, 
+          name: 'commentRepository',
+          internal: CommentRepository.name,
+        },
       ]
     }
-  }, 
+  },
 ]);
 
 export default container;

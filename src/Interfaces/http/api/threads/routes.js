@@ -1,6 +1,6 @@
 import express from 'express';
 
-const createThreadsRouter = (handler, container) => {
+const createThreadsRouter = (handler) => {
   const router = express.Router({ mergeParams: true });
 
   router.post('/', handler.postThreadHandler);

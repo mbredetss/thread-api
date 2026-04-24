@@ -385,7 +385,7 @@ describe('HTTP server', () => {
       // Assert
       expect(response.status).toEqual(401);
       expect(response.body.status).toEqual('fail');
-      expect(response.body.message).toEqual('access token tidak valid!');
+      expect(response.body.message).toEqual('Missing authentication');
     });
 
     it('should response 401 when users sending wrong format authorization header', async () => {
@@ -398,13 +398,13 @@ describe('HTTP server', () => {
 
       // Action
       const response = await request(app).post('/threads').send(requestPayload)
-        .set('Authorization', `token`);
+        .set('Authorization', 'token');
 
       // Assert
       expect(response.status).toEqual(401);
       expect(response.body.status).toEqual('fail');
-      expect(response.body.message).toEqual('access token tidak valid!');
-    })
+      expect(response.body.message).toEqual('Missing authentication');
+    });
 
     it('should response 201 and store threads correctly', async () => {
       // Arrange
@@ -491,7 +491,7 @@ describe('HTTP server', () => {
       // Asserrt
       expect(response.status).toEqual(401);
       expect(response.body.status).toEqual('fail');
-      expect(response.body.message).toEqual('access token tidak valid!');
+      expect(response.body.message).toEqual('Missing authentication');
     });
 
     it('should response 401 when users adding comment with invalid access token', async () => {
@@ -503,7 +503,7 @@ describe('HTTP server', () => {
       await UsersTableTestHelper.addUser({});
       await ThreadTableTestHelper.addThread({ owner: 'user-123' });
 
-      const accessToken = 'invalid token'
+      const accessToken = 'invalid token';
       const app = await createServer(container);
 
       // Action
@@ -513,7 +513,7 @@ describe('HTTP server', () => {
       // Assert
       expect(response.status).toEqual(401);
       expect(response.body.status).toEqual('fail');
-      expect(response.body.message).toEqual('access token tidak valid!');
+      expect(response.body.message).toEqual('Missing authentication');
     });
 
     it('should response 404 when users adding comment in not found thread', async () => {
@@ -579,7 +579,7 @@ describe('HTTP server', () => {
       // Assert
       expect(response.status).toEqual(401);
       expect(response.body.status).toEqual('fail');
-      expect(response.body.message).toEqual('access token tidak valid!');
+      expect(response.body.message).toEqual('Missing authentication');
     });
 
     it('should response 403 when users trying to delete comments that dont belong to him', async () => {
@@ -642,7 +642,7 @@ describe('HTTP server', () => {
       expect(response.body.message).toEqual('komentar tidak di temukan!');
     });
 
-    it('should response 201 and delete comments correctly', async () => {
+    it('should response 200 and delete comments correctly', async () => {
       // Assert
       await UsersTableTestHelper.addUser({});
       await ThreadTableTestHelper.addThread({ owner: 'user-123' });
@@ -657,7 +657,7 @@ describe('HTTP server', () => {
         .set('Authorization', `Bearer ${accessToken}`);
 
       // Assert
-      expect(response.status).toEqual(201);
+      expect(response.status).toEqual(200);
       expect(response.body.status).toEqual('success');
     });
   });
@@ -692,7 +692,7 @@ describe('HTTP server', () => {
       const response = await request(app).get('/threads/thread-123');
 
       // Assert
-      expect(response.status).toEqual(201);
+      expect(response.status).toEqual(200);
       expect(response.body.status).toEqual('success');
       expect(response.body.data.thread).toBeDefined();
       expect(response.body.data.thread.comments).toHaveLength(2);
