@@ -8,7 +8,6 @@ import NewComment from '../../../Domains/comments/entities/NewComment';
 import pool from '../../database/postgres/pool.js';
 import CommentRepositoryPostgres from '../CommentRepositoryPostgres.js';
 import AuthorizationError from '../../../Commons/exceptions/AuthorizationError.js';
-import DetailedComment from '../../../Domains/comments/entities/DetailedComment.js';
 
 describe('CommentRepositoryPostgres', () => {
   afterEach(async () => {
@@ -155,18 +154,20 @@ describe('CommentRepositoryPostgres', () => {
       // Assert
       expect(comments).toHaveLength(2);
       expect(comments).toStrictEqual([
-        new DetailedComment({
+        {
           id: 'comment-123',
           username: 'dicoding',
           date: comments[0].date,
+          isDelete: false,
           content: 'ini konten',
-        }),
-        new DetailedComment({
+        },
+        {
           id: 'comment-234',
           username: 'dicoding',
           date: comments[1].date,
-          content: '**komentar telah dihapus**',
-        }),
+          isDelete: true,
+          content: 'ini konten',
+        },
       ]);
     });
   });

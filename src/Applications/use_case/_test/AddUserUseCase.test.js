@@ -22,6 +22,7 @@ describe('AddUserUseCase', () => {
       username: useCasePayload.username,
       fullname: useCasePayload.fullname,
     });
+    const mockHashPassword = 'encrypted_password';
 
     /** creating dependency of use case */
     const mockUserRepository = new UserRepository();
@@ -31,7 +32,7 @@ describe('AddUserUseCase', () => {
     mockUserRepository.verifyAvailableUsername = vi.fn()
       .mockImplementation(() => Promise.resolve());
     mockPasswordHash.hash = vi.fn()
-      .mockImplementation(() => Promise.resolve('encrypted_password'));
+      .mockImplementation(() => Promise.resolve(mockHashPassword));
     mockUserRepository.addUser = vi.fn()
       .mockImplementation(() => Promise.resolve(mockRegisteredUser));
 

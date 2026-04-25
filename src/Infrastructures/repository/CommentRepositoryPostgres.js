@@ -2,7 +2,6 @@ import AuthorizationError from '../../Commons/exceptions/AuthorizationError.js';
 import NotFoundError from '../../Commons/exceptions/NotFoundError.js';
 import CommentRepository from '../../Domains/comments/CommentRepository.js';
 import AddedComment from '../../Domains/comments/entities/AddedComment.js';
-import DetailedComment from '../../Domains/comments/entities/DetailedComment.js';
 
 class CommentRepositoryPostgres extends CommentRepository {
   constructor(pool, idGenerator) {
@@ -73,14 +72,7 @@ class CommentRepositoryPostgres extends CommentRepository {
     };
 
     const result = await this._pool.query(query);
-
-    const comments = result.rows.map((comment) => new DetailedComment({
-      id: comment.id,
-      username: comment.username,
-      date: comment.date.toISOString(),
-      content: comment.isDelete ? '**komentar telah dihapus**' : comment.content
-    }));
-    return comments;
+    return result.rows;
   }
 }
 

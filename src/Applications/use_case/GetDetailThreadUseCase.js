@@ -1,3 +1,5 @@
+import DetailedComment from '../../Domains/comments/entities/DetailedComment';
+
 class GetDetailThreadUseCase {
   constructor({
     threadRepository,
@@ -10,8 +12,13 @@ class GetDetailThreadUseCase {
 
     const { threadId } = useCaseData;
     const detailThread = await this._threadRepository.getDetailThread(threadId);
-    const detailComment = await this._commentRepository.getCommentFromThread(threadId);
-
+    const comments = await this._commentRepository.getCommentFromThread(threadId);
+    const detailComment = comments.map((comment) => new DetailedComment({
+      id: comment.id,
+      username: comment.username,
+      date: comment.date.toISOString(),
+      content: comment.isDelete ? '**komentar telah dihapus**' : comment.content
+    }));
     return {
       thread: {
         ...detailThread,
