@@ -43,9 +43,9 @@ jobs:
         npm run test
       env:
         CI: true
-        HOST: https://a60d-180-249-60-180.ngrok-free.app 
+        HOST: localhost
         PORT: 5000
-        PGHOST: https://a60d-180-249-60-180.ngrok-free.app 
+        PGHOST: localhost
         PGPORT: 5432
         PGUSER: postgres
         PGPASSWORD: mbredets882
