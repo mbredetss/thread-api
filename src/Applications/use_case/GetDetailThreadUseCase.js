@@ -1,4 +1,4 @@
-import DetailedComment from '../../Domains/comments/entities/DetailedComment';
+import DetailedComment from '../../Domains/comments/entities/DetailedComment.js';
 
 class GetDetailThreadUseCase {
   constructor({
