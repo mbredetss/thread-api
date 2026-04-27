@@ -19,6 +19,9 @@ const createServer = async (container) => {
   app.use('/threads/:threadId/comments', comments(container));
   app.use('/threads/:threadId/comments/:commentId', comments(container));
   app.use('/threads/:threadId', threads(container));
+  app.get('/', (req, res) => {
+    res.status(200).json({ data: 'Hello world!' });
+  });
 
   // Global error handler
   app.use((error, req, res, _next) => {
