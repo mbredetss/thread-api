@@ -34,7 +34,7 @@ describe('HTTP server', () => {
     expect(response.status).toEqual(404);
   });
 
-    describe('when GET /', () => {
+    describe('when GET /sayHello', () => {
     it('should return 200 and hello world', async () => {
       // Arrange
       const app = await createServer({});
